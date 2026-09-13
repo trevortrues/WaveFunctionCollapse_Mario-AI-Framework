@@ -1,128 +1,274 @@
-<p align="center">
-<a href="#features">Features</a> &mdash; <a href="#use">How To Use</a> &mdash; <a href="#papers">Related Papers</a> &mdash; <a href="#missing">Missing Features</a> &mdash; <a href="#copyrights">Copyrights</a>
-</p>
-<p align="center">
-<img width="300" height="300" alt="Robin Baumgarten A* agent" src="https://raw.githubusercontent.com/amidos2006/Mario-AI-Framework/master/img/frameworkAD.gif">
-</p>
-<p align="center">
-  <b>Current Framework Version: 0.8.0</b>
-</p>
+[![IEEE CoG 2026](https://img.shields.io/badge/IEEE%20CoG-2026-0b6e4f)](https://cog2026.org/)
+![Java](https://img.shields.io/badge/Java-11%2B-007396?logo=openjdk&logoColor=white)
+![Python](https://img.shields.io/badge/Python-analysis-3776AB?logo=python&logoColor=white)
+![Julia](https://img.shields.io/badge/Julia-analysis-9558B2?logo=julia&logoColor=white)
 
-The Mario AI framework is a framework for using AI methods with a version of Super Mario Bros.
+# From Tiles to Jumps: WFC Window Size for Playable Platformer Generation
 
-This is an updated version for the Mario AI Framework. As the first version was released in 2009, this is the tenth anniversary edition, integrating features from all previous versions and adding several new features. This new code includes a better interface for playing the game with planning algorithms (the planning track of the competition), generating levels (the level generation track), and possibly will support the learning track in the future . The framework comes with multiple different planning agents, level generators and thousands of levels including generated levels from diffeent generators as well as the original Mario levels. Also, the framework is compatible with [Video Game Level Corpus (VGLC)](https://github.com/TheVGLC/TheVGLC) processed notations.
+Generated and evaluated **153,000 Super Mario Bros. levels** to identify which Wave Function Collapse window sizes produce playable platformer content. Playability plateaued once the window spanned Mario's jump height.
 
-If you want to access the old framework, feel free to check out the old websites for the previous competitions ([2015](https://sites.google.com/site/platformersai/platformer-ai-competition) - [2012](https://sites.google.com/site/noormario/home?pli=1) - [2011](https://sites.google.com/a/marioai.com/www/home) - [2009](http://julian.togelius.com/mariocompetition2009/)).
+This repository contains the Java generator, A* evaluation pipeline, analysis code, generated-level examples, and experiments used in the paper by Trevor Truesdell and Britton Horn, Trinity University, **accepted for presentation at IEEE Conference on Games (CoG) 2026**.
 
-<h3 id="features">Features</h3>
+Built on top of the [Mario AI Framework](https://github.com/amidos2006/Mario-AI-Framework) by Ahmed Khalifa.
 
-------
-- Better Interface for the framework
-- Faster framework
-- Using the original mario art
-- Eleven different playing agents
-- Agents now have a forward model, no more hacks for that
-- Observation grids can be centered around mario or can reflect the current screen.
-- Helper classes to check the observation grid instead of comparing integers
-- Five different level generators
-- Level generator have a forward model to test the levels
-- Thousands of generated levels from winners of the level generation track
-- Fifteen levels from the original mario bros
-- Support event history for major game events
-- A human readable level files
+## Project Highlights
 
-<h3 id="use">How To Use</h3>
+- **Technical Work:** Implemented a configurable WFC generator, multi-source batch runner, output management, and Mario game-agent integration.
+- **Experiment Scope:** Generated and evaluated **153,000 levels** across 9 window sizes and 17 source configurations.
+- **Key Finding:** Agent completion increased from **32.0% at 2 x 2** to **99.9% at 6 x 6**, where playability plateaued.
 
-------
-#### Planning Track
-Download the repo and run the [`PlayLevel.java`](https://github.com/amidos2006/Mario-AI-Framework/blob/master/src/PlayLevel.java) file. It will run [`robinBaumgarten`](https://github.com/amidos2006/Mario-AI-Framework/tree/master/src/agents/robinBaumgarten) A* agent on the [first Mario level](https://github.com/amidos2006/Mario-AI-Framework/blob/master/levels/original/lvl-1.txt) from the original Super Mario Bros. The game will run for 20 seconds (in-game time) and with Mario starting as small Mario and visuals appearing. To change the agent just change the package name of the agent in the following code
+The visual comparison below shows the progression from diverse but incoherent layouts to structured, playable output.
+
+| 1 x 1: diverse, incoherent | 3 x 3: emerging structure | 6 x 6: structured, playable |
+| --- | --- | --- |
+| ![Level 4 generated with a 1x1 window](img/lvl-4-1x1.png) | ![Level 4 generated with a 3x3 window](img/lvl-4-3x3.png) | ![Level 4 generated with a 6x6 window](img/lvl-4-6x6.png) |
+
+At 3 x 3, recognizable ground segments and pipe fragments begin to appear, but gaps are still frequently unjumpable.
+
+The project combines procedural generation, game-agent evaluation, statistical analysis, and human playtesting to connect those output differences to actual player experience.
+
+---
+
+## How WFC Works
+
+WFC generates tile-based content by extracting patterns from an example and enforcing their adjacency rules. The **window size**, the M × N rectangle captured during pattern extraction, controls how much spatial context each pattern encodes. Small windows produce varied but incoherent output; large windows preserve structure but collapse toward reproducing the source.
+
+This project measures that trade-off across agent completion, structural metrics, and human playtesting. Window size provides a physics-grounded control for how much structure the generator preserves.
+
+---
+
+## Visual Results
+
+The examples below are generated from **Level 4** as the source. The comparison in Project Highlights shows the full 1x1 to 6x6 progression; these additional examples show the intermediate failure mode, the useful middle range, and the over-constrained large-window case.
+
+### Source level
+
+![Level 4: original](img/lvl-4.png)
+
+### 2 × 2: worst performer
+
+![Level 4 at 2x2](img/lvl-4-2x2.png)
+
+Enough context to escape 1×1's density, not enough for deliberate structure. **32%** completion, the lowest of any window size.
+
+### 4 × 4 to 5 × 5: the usable middle
+
+![Level 4 at 5x5](img/lvl-4-5x5.png)
+
+Mid-size windows balance playability against diversity, reaching **68.6%** completion at 4 x 4 and **87.1%** at 5 x 5.
+
+### 14 × 6: over-constrained
+
+![Level 4 at 14x6](img/lvl-4-14x6.png)
+
+Full jump height *and* length. Also **99.9%** completion, but edit distance to the source drops to near zero, meaning the generator is essentially reproducing its input. Playable, but barely generative.
+
+### Physics-oriented windows
+
+Beyond the square progression, three windows test specific movement constraints:
+
+| Window | Captures | Completion |
+|---|---|---|
+| 6 × 6 | Mario's jump height | 99.9% |
+| 14 × 2 | Full jump length, minimal vertical context | 96.0% |
+| 14 × 6 | Full jump length and height | 99.9% |
+
+### Decoration removal (Level 13)
+
+| Original | Supports removed |
+|---|---|
+| ![Level 13](img/lvl-13.png) | ![Level 13 modified](img/lvl-13modified.png) |
+
+Level 13's decorative mushroom supports sit directly on the traversal path. Removing them, the minimal structural intervention available, measurably changed output diversity and completion, suggesting purely aesthetic tiles still carry adjacency context that shapes pattern coherence.
+
+---
+
+## Research Results
+
+Agent completion percentage by window size, averaged across all source levels:
+
+| Window Size | Mean Completion | Variance |
+|---|---|---|
+| 1 × 1 | 0.756 | 0.141 |
+| 2 × 2 | 0.320 | 0.110 |
+| 3 × 3 | 0.558 | 0.161 |
+| 4 × 4 | 0.686 | 0.130 |
+| 5 × 5 | 0.871 | 0.074 |
+| 6 × 6 | **0.999** | <0.001 |
+| 1 × 16 | 0.879 | 0.077 |
+| 14 × 2 | 0.960 | 0.024 |
+| 14 × 6 | **0.999** | <0.001 |
+
+A one-way ANOVA found window size significantly affects completion, F(8, 152991) = 11092.12, p < 0.001. Tukey's HSD found all pairwise comparisons significant at p < .001 except 5×5 vs 1×16 and 6×6 vs 14×6.
+
+**Vertical context matters more than horizontal.** 14×2 captures full jump *length* but only 2 tiles of height, and reaches 96%. 6×6 captures jump *height* and reaches 99.9%. Gaps rarely span maximum jump distance, but vertical relationships are hard-constrained by fixed jump height.
+
+**Human trials (n = 25).** Large-window levels were rated statistically indistinguishable from original Super Mario Bros. levels on playability, enjoyment, coherence, and replayability, differing only on challenge, where they scored lower. Agent completion was a strong predictor of human progress (rs = 0.582, p < .001), supporting A* screening as a cheap proxy before committing to playtesting.
+
+---
+
+## Implementation
+
+The WFC implementation lives in [`src/levelGenerators/ttWFC/`](src/levelGenerators/ttWFC/), with [`OverlappingModel.java`](src/levelGenerators/ttWFC/OverlappingModel.java) as its core. It partitions each Mario level into non-overlapping M × N regions, identifies repeated tile regions, and learns their valid adjacencies and frequencies directly from the source levels.
+
+For a quick code review, start with [`OverlappingModel.java`](src/levelGenerators/ttWFC/OverlappingModel.java), then follow the reusable generation API in [`LevelGenerator.java`](src/levelGenerators/ttWFC/LevelGenerator.java) and the batch orchestration in [`BatchRunner.java`](src/levelGenerators/ttWFC/BatchRunner.java).
+
+This design makes window size the main experimental variable while preserving the structural relationships that make a Mario level playable. The implementation also supports pooled multi-level generation through the `"all"` source configuration.
+
+Key implementation details:
+
+- Levels are padded with `-` to a multiple of M horizontally and N vertically, then trimmed back on save (trailing all-hyphen columns are detected dynamically).
+- The bitmap is stored bottom-row-first internally and flipped on write, so ground constraints read naturally.
+- `symmetry = 1` throughout, meaning only the unrotated, unreflected variant of each pattern is kept. Rotation and reflection would flip staircases and place ground on ceilings.
+- `periodicInput` and `periodic` are both false. Wrapping edges would let ground appear at arbitrary heights.
+
+---
+
+## WFC modifications
+
+Several changes were needed on top of the stock bitmap-oriented algorithm:
+
+- **Edge constraints:** `groundAllowed`, `topAllowed`, `leftAllowed`, and `rightAllowed` record which patterns were observed touching each boundary in the source. Patterns are restricted to the boundaries they legitimately occupied. Without this, edge tiles placed in the interior cause generation failures from missing adjacencies.
+- **`"all"` multi-source mode:** reads all 15 originals from `samples/` and pools their tiles and adjacencies, letting patterns blend across levels with otherwise incompatible rules. Requires the similar-tiles reduction below.
+- **Similar tiles:** enemy characters (`g G r R k K y Y o`) are stripped before comparison, and tiles identical under that reduction are grouped into equivalence classes that share adjacency. Without this, ambiguous enemy placement over-constrains generation. During generation any member of the class may be selected.
+- **Mario and finish tile placement:** `M` and `F` carry singular adjacencies and drift to arbitrary x positions, sometimes putting the finish before the start or producing duplicates. Their cells are pre-observed at fixed output indices (`mPreobserveIndex`, `fPreobserveIndex`), derived from their position in the source and offset to the output dimensions.
+- **Retry on contradiction:** generation that hits a contradiction is retried with a fresh seed rather than backtracked. Note that failure rates were not tracked, so the frequency of regeneration is unknown.
+
+---
+
+## Run It
+
+The recommended entry point is [`src/levelGenerators/GenerateWFC.java`](src/levelGenerators/GenerateWFC.java). Edit its configuration constants before running it; there are no command-line arguments. `GenerateWFC` selects single-level or batch mode and delegates batch generation to `BatchRunner`. Run it from the repository root so relative paths resolve correctly. Source levels are read from `src/levelGenerators/ttWFC/samples/`, which mirrors `levels/original/` and adds `lvl-13-modified.txt`.
+
+When using VS Code with the parent workspace open, select **Run GenerateWFC** from **Run and Debug**. Its launch configuration sets the working directory to `WaveFunctionCollapse_Mario-AI-Framework`; the regular **Run Java** button may use the parent folder instead.
+
+`GenerateWFC` supports two modes:
+
+```java
+private static final Mode MODE = Mode.BATCH;
+private static final OutputMode OUTPUT_MODE = OutputMode.WINDOW_FOLDERS;
+private static final Path OUTPUT_ROOT = Paths.get("WFC_Output");
 ```
+
+Use `Mode.SINGLE_LEVEL` for one output or `Mode.BATCH` for repeated generation. `OutputMode.WINDOW_FOLDERS` stores levels in folders such as `WFC_Output/1x1/` and `WFC_Output/2x2/`; `OutputMode.ONE_FOLDER` stores all generated files directly in `WFC_Output/`.
+
+### A single level
+
+Set `MODE` to `Mode.SINGLE_LEVEL`, then edit:
+
+```java
+private static final String SINGLE_LEVEL = "lvl-13";
+private static final int SINGLE_M = 6;
+private static final int SINGLE_N = 3;
+```
+
+Output width is taken from the source level and padded to a multiple of M; height is fixed at 16 and padded to a multiple of N. The generator retries with new seeds until one succeeds, then writes a file such as `WFC_Output/6x3/ttwfc-lvl-13-M6-N3-s12345.txt`.
+
+`LevelGenerator` implements `MarioLevelGenerator` under the name `ttWFC`, so it also drops into the framework's standard pipeline via `GenerateLevel.java`:
+
+```java
+MarioLevelGenerator generator = new levelGenerators.ttWFC.LevelGenerator();
+```
+
+### A full sweep
+
+Set `MODE` to `Mode.BATCH` and edit:
+
+```java
+private static final String[] BATCH_LEVELS = {"all"};
+private static final int[][] BATCH_WINDOWS = {{1, 1}, {2, 2}};
+private static final int BATCH_REPEATS = 1000;
+private static final int BATCH_ATTEMPTS_PER_REPEAT = 10000;
+```
+
+Each `BATCH_WINDOWS` entry is an explicit `{M, N}` pair. For example, `{{1, 1}, {2, 2}}` generates only 1x1 and 2x2 windows. Add more entries to generate more window sizes, and add more names to `BATCH_LEVELS` to use specific source levels instead of `"all"`.
+
+Output is written to files such as `WFC_Output/1x1/tmp-all-M1-N1-s12345.txt`. The batch runner does not create a CSV or evaluate levels; it only generates level files. Runs that exhaust `BATCH_ATTEMPTS_PER_REPEAT` log a warning and skip.
+
+### Playing or evaluating a level
+
+Run [`src/PlayLevel.java`](src/PlayLevel.java), which runs the `robinBaumgarten` A* agent on a given level:
+
+```java
 printResults(game.runGame(new agents.robinBaumgarten.Agent(), getLevel("levels/original/lvl-1.txt"), 20, 0, true));
 ```
-to any of the package names that are found in [`src/agents/`](https://github.com/amidos2006/Mario-AI-Framework/tree/master/src/agents) folder, feel free to use any in your work. If you want to play a level yourself uncomment the following code in [`PlayLevel.java`](https://github.com/amidos2006/Mario-AI-Framework/blob/master/src/PlayLevel.java) file
+
+Point `getLevel` at anything under `levels/` or at generated output in `WFC_Output/`. Uncomment the `playGame` line to play it yourself instead. The full A* suite used for the paper's playability numbers is in [`src/mff/`](src/mff/).
+
+---
+
+## Repository layout
+
 ```
-//printResults(game.playGame(getLevel("levels/original/lvl-1.txt"), 200, 0));
+img/                          Figures and window size examples
+levels/
+  original/                   The 15 original Super Mario Bros. levels
+  waveFunctionCollapse/       Archived dataset, one folder per window size
+    1x1/ 2x2/ 3x3/ 4x4/ 5x5/ 6x6/ 14x2/ 14x6/ 1x16/
+  ge/ hopper/ notch/          Output from the framework's other generators
+  notchParam/ notchParamRand/
+  ore/ sampler/
+  patternCount/               
+  patternOccur/
+  patternWeightCount/
+src/
+  levelGenerators/
+    GenerateLevel.java
+    GenerateWFC.java          Recommended WFC entry point
+    PlayLevel.java
+    ttWFC/                    Our WFC implementation
+      OverlappingModel.java     Core algorithm
+      Model.java                Base solver: wave, propagator, observe
+      LevelGenerator.java       Single-level generation
+      BatchRunner.java          Batch-generation engine used by GenerateWFC
+      samples/                  Source levels the generator reads
+    benWeber/ linear/         Framework's bundled generators
+    notch/ random/ sampler/
+  agents/                     Playing agents
+  engine/                     Framework core
+  metrics/                    Structural and similarity metrics
+  mff/                        MFF A* agent suite
+WFC_Output/                     Generated levels from GenerateWFC
 ```
-and comment the agent running line from before. This code will run the framework to play the [first mario level](https://github.com/amidos2006/Mario-AI-Framework/blob/master/levels/original/lvl-1.txt) of the original Super Mario Bros with 200 tick on the game clock and with Mario starting as small mario. Feel free to change the `0` to `1` to start as Large Mario or `2` to start as Fire Mario.
 
-#### Level Generation Track
-Download the repo and run the [`GenerateLevel.java`](https://github.com/amidos2006/Mario-AI-Framework/blob/master/src/GenerateLevel.java) from the [`src/`](https://github.com/amidos2006/Mario-AI-Framework/tree/master/src) folder to test the framework. It will run the `notch` generator to generate a level then it will run [`robinBaumgarten`](https://github.com/amidos2006/Mario-AI-Framework/tree/master/src/agents/robinBaumgarten) A* agent to play that generated level. Feel free to try another generators by changing the package name of generator in the following line
+---
+
+## Experiment Pipeline
+
+1. **Generation** (Java): `GenerateWFC` configures the run and delegates batch generation to `BatchRunner`, producing 1000 levels per window size per source configuration; 9 window sizes × 17 source configurations × 1000 = 153,000 total.
+2. **Playability** (Java): the MFF A* agent suite is run over every generated level; playability is the horizontal completion percentage of the best-performing agent.
+3. **Analysis** (Python, Julia): normalized edit distance (Levenshtein over the flattened level string), compression distance (gzip), and the linearity, density, and leniency metrics from Horn et al.
+4. **Statistics:** one-way ANOVA with Tukey's HSD; Kruskal-Wallis and Mann-Whitney U with Bonferroni correction for the human trial data; linear mixed-effects models with per-participant random intercepts for Likert outcomes.
+
+---
+
+## Citation
+
+If you use this code, generated levels, or experimental results, please cite the paper:
+
+```bibtex
+@inproceedings{truesdell2026tiles,
+  title     = {From Tiles to Jumps: Optimizing Wave Function Collapse Window Size for Playable Platformer Generation},
+  author    = {Truesdell, Trevor and Horn, Britton},
+  booktitle = {IEEE Conference on Games (CoG)},
+  year      = {2026}
+}
 ```
-MarioLevelGenerator generator = new levelGenerators.notch.LevelGenerator();
-```
-to any of the other package names of the other generator that can be found in in [`src/levelGenerators/`](https://github.com/amidos2006/Mario-AI-Framework/tree/master/src/levelGenerators) folder, feel free to use any in your work. The generators runs for maximum time of 5 hours to generate a level of 150x16 tiles using the following line:
-```
-String level = generator.getGeneratedLevel(new MarioLevelModel(150, 16), new MarioTimer(5*60*60*1000));
-```
-If you want to play the level by yourself or change the AI playing agent check the Planning Track subsection.
 
-<h3 id="papers">Related Papers</h3>
+---
 
-------
-The following paper describes the original Mario AI Benchmark:
-- [[2012] The Mario AI Benchmark and Competitions](http://julian.togelius.com/Karakovskiy2012The.pdf) by Sergey Karakovskiy and Julian Togelius. Published in the IEEE Transactions on Computational Intelligence and AI in Games (TCIAG), volume 4 issue 1, 55-67.
+## Credits and copyrights
 
-The following list show all the papers that talk mainly about playing the game in the Mario AI framework:
-- [[2009] Super Mario Evolution](http://julian.togelius.com/Togelius2009Super.pdf) by Julian Togelius, Sergey Karakovskiy, Jan Koutnik and Jurgen Schmidhuber. Published in the proceedings of the IEEE Symposium on Computational Intelligence and Games.
-- [[2010] The 2009 Mario AI Competition](http://julian.togelius.com/Togelius2010The.pdf) by Julian Togelius, Sergey Karakovskiy and Robin Baumgarten. Published in the proceedings of the IEEE Congress on Evolutionary Computation (CEC).
-- [[2013] The Mario AI Championship 2009–2012](http://julian.togelius.com/Togelius2013The.pdf) by Julian Togelius, Noor Shaker, Sergey Karakovskiy and Georgios N. Yannakakis. Published in AI Magazine, 34(3), 89-92.
-- [[2013] Imitating human playing styles in Super Mario Bros](http://julian.togelius.com/Ortega2013Imitating.pdf) by Juan Ortega, Noor Shaker, Julian Togelius and Georgios N. Yannakakis. Published in the Entertainment Computing, Elsevier, vol. 4, pp. 93-104.
-- [[2014] Monte Mario: Platforming with MCTS](http://julian.togelius.com/Jacobsen2014Monte.pdf) by Emil Juul Jacobsen, Rasmus Greve and Julian Togelius. Published in the proceedings of the ACM Conference on Genetic and Evolutionary Computation.
+This work extends the [Mario AI Framework](https://github.com/amidos2006/Mario-AI-Framework), created by [Ahmed Khalifa](https://scholar.google.com/citations?user=DRcyg5kAAAAJ&hl=en), based on the original Mario AI Framework by [Sergey Karakovskiy](https://scholar.google.se/citations?user=6cEAqn8AAAAJ&hl=en), [Noor Shaker](https://scholar.google.com/citations?user=OK9tw1AAAAAJ&hl=en), and [Julian Togelius](https://scholar.google.com/citations?user=lr4I9BwAAAAJ&hl=en), which in turn was based on Infinite Mario Bros by Markus Persson.
 
-The following is a list of papers about level generation in Mario AI Framework:
-- [[2010] The 2010 Mario AI Championship: Level Generation Track](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6003769) by Noor Shaker, Julian Togelius, Georgios N. Yannakakis, Ben Weber, Tomoyuki Shimizu, Tomonori Hashiyama, Nathan Sorenson, Philippe Pasquier, Peter Mawhorter, Glen Takahashi, Gillian Smith, and Robin Baumgarten. Published in the IEEE Transactions on Computational Intelligence and Games.
-- [[2010] Towards Automatic Personalized Content Generation for Platform Games](https://www.aaai.org/ocs/index.php/AIIDE/AIIDE10/paper/viewFile/2135/2546) by Noor Shaker, Georgios Yannakakis and Julian Togelius. Published in the procedings of AIIDE Conference on AI and Interactive Digital Entertainment.
-- [[2012] Evolving Personalized Content for Super Mario Bros Using Grammatical Evolution](http://julian.togelius.com/Shaker2012EvolvingPersonalized.pdf) by Noor Shaker, Georgios N. Yannakakis, Julian Togelius, Miguel Nicolau, and Michael O'Neill. Published in the AAAI Conference on Artificial Intelligence and Interactive Digital Entertainment (AIIDE).
-- [[2012] Patterns and Procedural Content Generation](http://julian.togelius.com/Dahlskog2012Patterns.pdf) by Steve Dahlskog and Julian Togelius. Published in the Proceedings of the FDG Workshop on Design Patterns in Games (DPG).
-- [[2013] Patterns as Objectives for Level Generation](http://julian.togelius.com/Dahlskog2013Patterns.pdf) by Steve Dahlskog and Julian Togelius. Published in the Proceedings of the Workshop on Design Patterns in Games at FDG.
-- [[2014] Procedural Content Generation Using Patterns as Objectives](http://julian.togelius.com/Dahlskog2014Procedural.pdf) by Steve Dahlskog and Julian Togelius. Published in the Proceedings of EvoGames, part of EvoStar.
-- [[2014] A Comparative Evaluation of Procedural Level Generators in the Mario AI Framework](http://julian.togelius.com/Horn2014Comparative.pdf) by Britton Horn, Steve Dahlskog, Noor Shaker, Gillian Smith and Julian Togelius. Published in the Proceedings of Foundations of Digital Games.
-- [[2014] Experiments in Map Generation using Markov Chains](http://www.fdg2014.org/papers/fdg2014_paper_29.pdf) by Sam Snodgrass and Santiago Ontañón. Published in the procceding of Foundation of Digital Games.
-- [[2014] A Hierarchical Approach to Generating Maps Using Markov Chains](https://www.aaai.org/ocs/index.php/AIIDE/AIIDE14/paper/viewPaper/8984) by Sam Snodgrass and Santiago Ontanon. Published in the Proceedings of the Tenth Annual AAAI Conference on Artificial Intelligence and Interactive Digital Entertainment.
-- [[2015] A Hierarchical MdMC Approach to 2D Video Game Map Generation](https://www.aaai.org/ocs/index.php/AIIDE/AIIDE15/paper/download/11518/11380) by Sam Snodgrass and Santiago Ontañón. Published in the Eleventh Artificial Intelligence and Interactive Digital Entertainment Conference.
-- [[2018] Generating Levels That Teach Mechanics](https://arxiv.org/pdf/1807.06734.pdf) by Michael Cerny Green, Ahmed Khalifa, Gabriella A. B. Barros, Andy Nealen and Julian Togelius. Published in the proceeding of Foundation of Digital Games.
-- [[2018] Evolving Mario Levels in the Latent Space of a Deep Convolutional Generative Adversarial Network](https://arxiv.org/pdf/1805.00728.pdf) by Vanessa Volz, Jacob Schrum, Jialin Liu, Simon M. Lucas, Adam Smith and Sebastian Risi. Published in the proceeding of the ACM Conference on Genetic and Evolutionary Computation.
-- [[2019] Intentional Computational Level Design](https://arxiv.org/pdf/1904.08972.pdf) by Ahmed Khalifa, Michael Cerny Green, Gabriella A. B. Barros and Julian Togelius. Published in the proceeding of the ACM Conference on Genetic and Evolutionary Computation.
+Thanks to Erick Rankin for contributions to this project.
 
-The following list includes papers that do not fit in the previous categories but still use the Mario AI Framework:
-- [[2009] Modeling Player Experience in Super Mario Bros](http://julian.togelius.com/Pedersen2009Modeling.pdf) by Chris Pedersen, Julian Togelius and Georgios N. Yannakakis. Published in the Proceedings of the IEEE Symposium on Computational Intelligence and Games.
-- [[2013] Decision Making Styles as Deviation from Rational Action A Super Mario Case Study](http://julian.togelius.com/Holmgard2013Decision.pdf) by Christoffer Holmgård, Julian Togelius and Georgios N. Yannakakis. Published in the Proceedings of the Artificial Intelligence in Digital Interactive Entertainment (AIIDE) conference.
-- [[2013] The Turing Test Track of the 2012 Mario AI Championship: Entries and Evaluation](http://julian.togelius.com/Shaker2013The.pdf) by Noor Shaker, Julian Togelius, Georgios N. Yannakakis, Likith P. K. Satish, Vinay S. Ethiraj, Stefan J. Johansson, Robert Reynolds, Leonard Kinnaird-Heether, Tom Schumann and Marcus Gallagher. Published in the Proceedings of the IEEE Conference on Computational Intelligence and Games.
+The WFC implementation follows [Maxim Gumin's](https://github.com/mxgmn/WaveFunctionCollapse) formulation, itself related to Merrell's Model Synthesis. Karth and Smith's framing of WFC as constraint solving informs the approach taken here.
 
-We are aware that this list is not complete. If you want your paper added, please [contact us](mailto:ahmed@akhalifa.com) and we will add it to the list.
+Playability testing uses the MFF A* agent suite:
 
-<h3 id="missing">Missing Features</h3>
+Šosvald, David; Gemrot, Jakub. *Super Mario A-Star Agent Reloaded.* In: 2025 IEEE 37th International Conference on Tools with Artificial Intelligence (ICTAI). IEEE, 2025, pp. 1308–1315.
 
-------
-- ~~The MarioAI framework core engine~~
-- ~~Implementing a forward model and multiple different observations (based around mario/based around the screen center)~~
-- ~~Implementing the original SMB graphics instead of Mario world graphics~~
-- ~~Adding multiple agents from the previous competition~~
-- ~~Isolating particle effects from game sprites~~
-- ~~Only using the first SMB action set (no more shell carrying/wall jumping)~~
-- ~~Documenting the interface~~
-- ~~Adding Generated Levels~~
-- ~~Adding the level generator interface~~
-- ~~Adding the level generators to the framework~~
-- ~~Better way to check the observation grid Using TileType and SpriteType~~
-- ~~Adding event history for the game and agent to MarioResults~~
-- ~~Modifying the original Mario levels to include more details~~
-- ~~Adding Punishing Model to the Engine where the player dies when certain basic event fires~~
-- Allow the punishing model to tackle more complex events that need to be infered
-- Allow Agent debugging by drawing the searched trajectories like the Robin A* video
-- Adapt more agents to the new Mario-Framework
-- Adapt more level generator to the new Mario-Framework
-- Add more stats to MarioResult class similar to Gameplay Metrics
-- Mix the TileType and TileFeature class
-- Adding a simple MCTS agent and simple A* agent
-- Koopa shells can come back to life after stomping on it
-- Adding Monte Mario agent
-- Multiple different backgrounds/palettes that the user can select from.
-- Documenting the whole engine
-- Mimicking the original SMB physics instead of SMW physics
-- Adding the learning track interface
+Evaluation methods are drawn from prior work: linearity, density, and leniency from Horn, Dahlskog, Shaker, Smith, and Togelius (FDG 2014); expressive range analysis from Smith and Whitehead (PCGames 2010); the flattened-string edit distance from Dai et al. (AAAI 2024); gzip compression distance from Shaker, Nicolau, Yannakakis, Togelius, and O'Neill (CIG 2012); and the vertical column pattern motivating the 1 x 16 window from Dahlskog and Togelius (EvoGames 2014).
 
-<h3 id="copyrights">Copyrights</h3>
-
-------
-This framework is not endorsed by Nintendo and is only intended for research purposes. Mario is a Nintendo character which the authors don't own any rights to. Nintendo is also the sole owner of all the graphical assets in the game. Any use of this framework is expected to be on a non-commercial basis. This framework was created by [Ahmed Khalifa](https://scholar.google.com/citations?user=DRcyg5kAAAAJ&hl=en), based on the original Mario AI Framework by [Sergey Karakovskiy](https://scholar.google.se/citations?user=6cEAqn8AAAAJ&hl=en), [Noor Shaker](https://scholar.google.com/citations?user=OK9tw1AAAAAJ&hl=en), and [Julian Togelius](https://scholar.google.com/citations?user=lr4I9BwAAAAJ&hl=en), which in turn was based on [Infinite Mario Bros](https://fantendo.fandom.com/wiki/Infinite_Mario_Bros.) by Markus Persson.
+This framework is not endorsed by Nintendo and is intended for research purposes only. Mario is a Nintendo character and Nintendo is the sole owner of all graphical assets in the game. Any use of this framework is expected to be on a non-commercial basis.
