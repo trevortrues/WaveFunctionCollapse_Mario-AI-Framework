@@ -3,26 +3,30 @@ package levelGenerators.ttWFC;
 import engine.core.MarioGame;
 import engine.core.MarioLevelModel;
 import engine.core.MarioResult;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 
 public class BatchRunner {
     public static void main(String[] args) throws Exception {
-        String[] samples   = {"all"};
-        int[]    Ms        = { 1};
-        int[]    Ns        = { 16};
-        int      repeats   = 1000;  // how many outputs will be created per MxN size and sample
-        int      attemptsPerRepeat = 10000;     
-        // MarioGame game     = new MarioGame();
-        try (PrintWriter csv = new PrintWriter(new FileWriter("ttwfc_results.csv"))) {
-            csv.println("sample,M,N,seed,gameStatus,completion,lives,coins,time,jumps,kills");
-            List<String> lines;
-            Random rnd = new Random(12345);
-            for (String sample : samples) {
+        run(new String[] {"all"}, new int[] {1}, new int[] {16}, 1000, 10000);
+    }
+
+    public static void run(String[] samples, int[] Ms, int[] Ns, int repeats,
+            int attemptsPerRepeat) throws Exception {
+        run(samples, createWindowSizes(Ms, Ns), repeats, attemptsPerRepeat,
+            Paths.get("output"), false);
+        }
+
+        public static void run(String[] samples, int[][] windowSizes, int repeats,
+            int attemptsPerRepeat, Path outputRoot, boolean separateWindowFolders)
+            throws Exception {
+        Files.createDirectories(outputRoot);
+        List<String> lines;
+        Random rnd = new Random(12345);
+        for (String sample : samples) {
                 if(sample.equals("all")){
                     lines = Files.readAllLines( Paths.get("src/levelGenerators/ttWFC/samples/" + "lvl-1" + ".txt"));
                 }
@@ -31,8 +35,16 @@ public class BatchRunner {
                 }
                 
 
-                for (int M : Ms) {
-                    for (int N : Ns) {
+                for (int[] windowSize : windowSizes) {
+                    if (windowSize.length != 2) {
+                        throw new IllegalArgumentException("Each window must contain M and N");
+                    }
+                    int M = windowSize[0];
+                    int N = windowSize[1];
+                    Path outputDirectory = separateWindowFolders
+                        ? outputRoot.resolve(M + "x" + N)
+                        : outputRoot;
+                    Files.createDirectories(outputDirectory);
                         int outW = lines.get(0).length();
                         int outH  = 16;
                         if(outW%M>0) outW += M - (outW % M);
@@ -56,18 +68,15 @@ public class BatchRunner {
                             }
 
                             if (!success) {
-                                // csv.printf(
-                                //   "%s,%d,%d,%d,FAIL,0.00,0,0,0,0,0%n",
-                                //   sample, M, N, -1
-                                // );
-                                // csv.flush();
                                 System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                                 System.out.println("   AFTER " + attemptsPerRepeat + "ATTEMPTS WFC FAILED ON " + sample+ " ON Window M="+M+", N="+N);
                                 System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                                 continue;
                             }
 
-                            String tmp = "output/tmp-" + sample + "-M" + M + "-N" + N + "-s" + seed;
+                            String tmp = outputDirectory.resolve(
+                                "tmp-" + sample + "-M" + M + "-N" + N + "-s" + seed
+                            ).toString();
                             if(success) wfc.Save(tmp);
 
                             // MarioLevelModel model = new MarioLevelModel(outW, outH);
@@ -80,18 +89,6 @@ public class BatchRunner {
                             //   40, 0, true
                             // );
 
-                            // csv.printf(
-                            //   "%s,%d,%d,%d,%s,%.2f,%d,%d,%d,%d,%d%n",
-                            //   sample, M, N, seed,
-                            //   res.getGameStatus(),
-                            //   res.getCompletionPercentage(),
-                            //   res.getCurrentLives(),
-                            //   res.getCurrentCoins(),
-                            //   (int)Math.ceil(res.getRemainingTime() / 1000f),
-                            //   res.getNumJumps(),
-                            //   res.getKillsTotal()
-                            // );
-                            // csv.flush();
                             // System.out.println("****************************************************************");
                             // System.out.println("**SAMPLE: " + sample + ", M: " + M + ", N: " + N + "********");
                             // System.out.println("****************************************************************");
@@ -102,11 +99,20 @@ public class BatchRunner {
                             // System.out.println("Bricks: " + res.getNumDestroyedBricks() + " Jumps: " + res.getNumJumps() + " Max X Jump: " + res.getMaxXJump() + " Max Air Time: " + res.getMaxJumpAirTime());
                             // System.out.println("****************************************************************");
                         }
-                    }
                 }
             }
 
-            System.out.println("Batch finished, see ttwfc_results.csv and outputs for output");
+        System.out.println("Batch finished. Generated levels are in " + outputRoot);
+    }
+
+    private static int[][] createWindowSizes(int[] Ms, int[] Ns) {
+        int[][] windowSizes = new int[Ms.length * Ns.length][2];
+        int index = 0;
+        for (int M : Ms) {
+            for (int N : Ns) {
+                windowSizes[index++] = new int[] {M, N};
+            }
         }
+        return windowSizes;
     }
 }

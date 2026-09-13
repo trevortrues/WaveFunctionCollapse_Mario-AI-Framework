@@ -1,7 +1,7 @@
 package levelGenerators.ttWFC;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
@@ -30,19 +30,18 @@ public class LevelGenerator implements MarioLevelGenerator {
   }
   
       public static String runAndGetLevel() throws Exception {
-        File folder = new File("output");
-        folder.mkdirs();
-        for (File f : folder.listFiles()) f.delete(); File outDir = new File("output");
-        if (outDir.exists()) {
-          for (File f : outDir.listFiles()) f.delete();
-        } else {
-          outDir.mkdirs();
+        return runAndGetLevel("lvl-13", 6, 3);
       }
+
+      public static String runAndGetLevel(String name, int M, int N) throws Exception {
+        return runAndGetLevel(name, M, N, Paths.get("output"));
+      }
+
+      public static String runAndGetLevel(String name, int M, int N,
+          Path outputDirectory) throws Exception {
+        Files.createDirectories(outputDirectory);
         Random random = new Random();
         int seed = random.nextInt();
-        String name = "lvl-13";
-        int M = 6;
-        int N = 3;
         List<String> lines = Files.readAllLines(
             Paths.get("src/levelGenerators/ttWFC/samples/" + name + ".txt")
         );
@@ -77,7 +76,8 @@ public class LevelGenerator implements MarioLevelGenerator {
             success = model.Run(seed, -1);
         } while (!success);
 
-        String outFile = "output/ttwfc_" + seed;
+        String outFile = outputDirectory.resolve("ttwfc_" + name + "-M" + M
+          + "-N" + N + "-s" + seed).toString();
         if(success) model.Save(outFile);
 
         byte[] bytes = Files.readAllBytes(Paths.get(outFile + ".txt"));
