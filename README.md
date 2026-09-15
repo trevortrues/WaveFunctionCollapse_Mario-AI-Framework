@@ -267,6 +267,7 @@ The WFC implementation follows [Maxim Gumin's](https://github.com/mxgmn/WaveFunc
 
 Playability testing uses the MFF A* agent suite:
 
+Sosvald, David et al. “Super Mario A-Star Agent Revisited.” 2021 IEEE 33rd International Conference on Tools with Artificial Intelligence (ICTAI) (2021): 1008-1012.
 Šosvald, David; Gemrot, Jakub. *Super Mario A-Star Agent Reloaded.* In: 2025 IEEE 37th International Conference on Tools with Artificial Intelligence (ICTAI). IEEE, 2025, pp. 1308–1315.
 
 Evaluation methods are drawn from prior work: linearity, density, and leniency from Horn, Dahlskog, Shaker, Smith, and Togelius (FDG 2014); expressive range analysis from Smith and Whitehead (PCGames 2010); the flattened-string edit distance from Dai et al. (AAAI 2024); gzip compression distance from Shaker, Nicolau, Yannakakis, Togelius, and O'Neill (CIG 2012); and the vertical column pattern motivating the 1 x 16 window from Dahlskog and Togelius (EvoGames 2014).
