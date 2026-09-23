@@ -1,9 +1,8 @@
+# From Tiles to Jumps: WFC Window Size for Playable Platformer Generation
 [![IEEE CoG 2026](https://img.shields.io/badge/IEEE%20CoG-2026-0b6e4f)](https://cog2026.org/)
 ![Java](https://img.shields.io/badge/Java-11%2B-007396?logo=openjdk&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-analysis-3776AB?logo=python&logoColor=white)
 ![Julia](https://img.shields.io/badge/Julia-analysis-9558B2?logo=julia&logoColor=white)
-
-# From Tiles to Jumps: WFC Window Size for Playable Platformer Generation
 
 Generated and evaluated **153,000 Super Mario Bros. levels** to identify which Wave Function Collapse window sizes produce playable platformer content. Playability plateaued once the window spanned Mario's jump height.
 
