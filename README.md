@@ -6,7 +6,7 @@
 
 Generated and evaluated **153,000 Super Mario Bros. levels** to identify which Wave Function Collapse window sizes produce playable platformer content. Playability plateaued once the window spanned Mario's jump height.
 
-This repository contains the Java generator, A* evaluation pipeline, analysis code, generated-level examples, and experiments used in the paper by Trevor Truesdell and Britton Horn, Trinity University, **accepted for presentation at IEEE Conference on Games (CoG) 2026**.
+This repository contains the Java generator, A* evaluation pipeline, analysis code, generated-level examples, and experiments used in the paper by Trevor Truesdell, Erik Rankin and Britton Horn, Trinity University, **accepted for presentation at IEEE Conference on Games (CoG) 2026**.
 
 Built on top of the [Mario AI Framework](https://github.com/amidos2006/Mario-AI-Framework) by Ahmed Khalifa.
 
@@ -259,8 +259,6 @@ If you use this code, generated levels, or experimental results, please cite the
 ## Credits and copyrights
 
 This work extends the [Mario AI Framework](https://github.com/amidos2006/Mario-AI-Framework), created by [Ahmed Khalifa](https://scholar.google.com/citations?user=DRcyg5kAAAAJ&hl=en), based on the original Mario AI Framework by [Sergey Karakovskiy](https://scholar.google.se/citations?user=6cEAqn8AAAAJ&hl=en), [Noor Shaker](https://scholar.google.com/citations?user=OK9tw1AAAAAJ&hl=en), and [Julian Togelius](https://scholar.google.com/citations?user=lr4I9BwAAAAJ&hl=en), which in turn was based on Infinite Mario Bros by Markus Persson.
-
-Thanks to Erick Rankin for contributions to this project.
 
 The WFC implementation follows [Maxim Gumin's](https://github.com/mxgmn/WaveFunctionCollapse) formulation, itself related to Merrell's Model Synthesis. Karth and Smith's framing of WFC as constraint solving informs the approach taken here.
 
