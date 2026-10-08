@@ -38,7 +38,7 @@ This project measures that trade-off across agent completion, structural metrics
 
 ## Visual Results
 
-The examples below are generated from **Level 4** as the source. The comparison in Project Highlights shows the full 1x1 to 6x6 progression; these additional examples show the intermediate failure mode, the useful middle range, and the over-constrained large-window case.
+The examples below are generated from **Level 4** as the source. The comparison in Project Highlights shows the full 1x1 to 14x6 progression; these additional examples show the intermediate failure mode, the useful middle range, and the over-constrained large-window case.
 
 ### Source level
 
