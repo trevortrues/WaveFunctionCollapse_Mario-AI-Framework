@@ -12,7 +12,7 @@ Built on top of the [Mario AI Framework](https://github.com/amidos2006/Mario-AI-
 
 ## Project Highlights
 
-- **Technical Work:** Implemented a configurable WFC generator, multi-source batch runner, output management, and Mario game-agent integration.
+- **Technical Work:** Implemented a configurable WFC generator, multi-source batch runner, output management, and automated metric extraction. 
 - **Experiment Scope:** Generated and evaluated **153,000 levels** across 9 window sizes and 17 source configurations.
 - **Key Finding:** Agent completion increased from **32.0% at 2 x 2** to **99.9% at 6 x 6**, where playability plateaued.
 
